@@ -6,11 +6,13 @@ namespace Tesco.Code.Example
     {
         static void Main(string[] args)
         {
-            var service = new LogAverageExecutionTimeDecorator<IAuthorisationService>(new AuthorisationServiceWithDelay(),
-                                                                                      new TescoStopwatch(), 
-                                                                                      new ConsoleLogger());
+            var service = 
+                new LogAverageExecutionTimeDecorator<IAuthorisationService>
+                    (new AuthorisationServiceWithDelay(),
+                     new TescoStopwatch(), 
+                     new ConsoleLogger());
 
-            for (int x = 0; x < 2000; x++)
+            for (int x = 0; x < 2000; x++) //2000 is a random number large enough to watch the "logging" in progress
             {
                 service.Authorise(new AuthorisationRequest());
             }

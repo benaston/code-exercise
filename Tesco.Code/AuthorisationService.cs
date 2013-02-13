@@ -4,7 +4,7 @@ namespace Tesco.Code
     {
         public void Authorise(AuthorisationRequest request)
         {
-            //Authorisation code
+            //Authorisation code (NOTE: please see LogAverageExecutionTimeDecorator for the instrumentation)
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
+using System.Threading;
 using NUnit.Framework;
 using Rhino.Mocks;
 
@@ -126,6 +127,55 @@ namespace Tesco.Code.Tests.Unit
             //assert
             _logger.AssertWasCalled(l => l.Log(expectedMessage),
                                     options => options.Repeat.Times(3));
+        }
+        
+        [Test]
+        public void Authorise_MultipleThreads_LogsExpectedNumberOfTimes()
+        {
+            //arrange
+            var request = new AuthorisationRequest();
+            var expectedMessage = string.Format(LogAverageExecutionTimeDecorator<IAuthorisationService>.LogMessageFormat, 1, MaxRequestsPerEntry);
+            _stopwatch.Stub(s => s.ElapsedTime).Return(new TimeSpan(0, 0, 0, 0, 1));
+            _decorator = new LogAverageExecutionTimeDecorator<IAuthorisationService>(_decoratee,
+                                                                                     _stopwatch,
+                                                                                     _logger, MaxRequestsPerEntry);
+
+            var t1 = new Thread(() =>
+            {
+                for (int x = 0; x <= MaxRequestsPerEntry * 3; x++)
+                {
+                    _decorator.Authorise(request);
+                }
+            });
+            
+
+            var t2 = new Thread(() =>
+            {
+                for (int x = 0; x <= MaxRequestsPerEntry * 3; x++)
+                {
+                    _decorator.Authorise(request);
+                }
+            });
+            
+            var t3 = new Thread(() =>
+            {
+                for (int x = 0; x <= MaxRequestsPerEntry * 3; x++)
+                {
+                    _decorator.Authorise(request);
+                }
+            });
+
+            //act
+            t1.Start();
+            t2.Start();
+            t3.Start();
+            t1.Join();
+            t2.Join();
+            t3.Join();
+
+            //assert
+            _logger.AssertWasCalled(l => l.Log(expectedMessage),
+                                    options => options.Repeat.Times(9));
         }
         
         [Test]

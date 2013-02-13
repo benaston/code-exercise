@@ -13,7 +13,7 @@ namespace Tesco.Code
     /// One problem with this implementation is that I am attempting to control access to 
     /// shared static variables manually, which is massively error-prone. Another problem is 
     /// that when the application shuts down then upto MaximumRequestsPerLogEntry timings may 
-    /// never be logged.
+    /// never have a corresponding average logged.
     /// 
     /// Depending on the nature of the application within which the code sits, a different 
     /// "cache" location for the timing information might be preferred: for example the 
@@ -68,13 +68,14 @@ namespace Tesco.Code
 
         /// <summary>
         /// Used as the continuation for the DisposableStopwatch.
-        /// More idiomatic C# could be used if the "fancy" "using" 
-        /// stopwatch implementation was not being used.
+        /// More idiomatic C# could be used if the "using" 
+        /// stopwatch syntax was not being used.
         /// </summary>
         private void RecordAndOrLog()
         {
             double averageTiming;
             int requestCount;
+
             lock (Timings)
             {
                 var elapsedMilliseconds = _stopwatch.ElapsedTime.TotalMilliseconds;
