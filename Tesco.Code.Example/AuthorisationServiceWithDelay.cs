@@ -12,7 +12,7 @@ namespace Tesco.Code.Example
 
         public void Authorise(AuthorisationRequest request)
         {
-            Thread.Sleep(_randomNumberGenerator.Next(100));
+            Thread.Sleep(_randomNumberGenerator.Next(25));
         }
     }
 }
