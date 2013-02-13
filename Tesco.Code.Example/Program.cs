@@ -12,7 +12,7 @@ namespace Tesco.Code.Example
                      new TescoStopwatch(), 
                      new ConsoleLogger());
 
-            for (int x = 0; x < 2000; x++) //2000 is a random number large enough to watch the "logging" in progress
+            for (int x = 0; x < 500; x++) //500 is a random number large enough to watch the "logging" in progress
             {
                 service.Authorise(new AuthorisationRequest());
             }
