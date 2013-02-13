@@ -3,6 +3,9 @@ using System.Diagnostics;
 
 namespace Tesco.Code
 {
+    /// <summary>
+    /// Wraps the .NET stopwatch type to improve testability.
+    /// </summary>
     public class TescoStopwatch : ITescoStopwatch
     {
         readonly Stopwatch _stopwatch = new Stopwatch();

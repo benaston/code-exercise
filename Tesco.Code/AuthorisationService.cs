@@ -1,4 +1,3 @@
-
 namespace Tesco.Code
 {
     public class AuthorisationService : IAuthorisationService

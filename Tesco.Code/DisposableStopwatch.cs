@@ -2,6 +2,10 @@ using System;
 
 namespace Tesco.Code
 {
+    /// <summary>
+    /// Permits the "using" syntax for the timing instrumentation.
+    /// Unneccessarily complicated, perhaps.
+    /// </summary>
     public class DisposableStopwatch : IDisposable
     {
         private readonly ITescoStopwatch _stopwatch;
@@ -18,6 +22,7 @@ namespace Tesco.Code
         {
             _stopwatch.Stop();
             _continuation();
+            _stopwatch.Reset();
         }
     }
 }
