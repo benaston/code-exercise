@@ -1,0 +1,13 @@
+*.[lL]og
+*.suo
+*.user
+*suo
+*user
+*vsmdi
+[lL]ogs
+_ReSharper*
+[Bb]in
+[Oo]bj
+*.trx
+/bin/*/*.dll
+*.pdb
