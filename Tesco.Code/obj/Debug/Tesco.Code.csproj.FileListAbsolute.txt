@@ -1,5 +1,0 @@
-C:\foo\code-exercise\Tesco.Code\bin\Debug\Tesco.Code.dll
-C:\foo\code-exercise\Tesco.Code\bin\Debug\Tesco.Code.pdb
-C:\foo\code-exercise\Tesco.Code\obj\Debug\ResolveAssemblyReference.cache
-C:\foo\code-exercise\Tesco.Code\obj\Debug\Tesco.Code.dll
-C:\foo\code-exercise\Tesco.Code\obj\Debug\Tesco.Code.pdb
