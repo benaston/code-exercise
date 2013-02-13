@@ -129,20 +129,23 @@ namespace Tesco.Code.Tests.Unit
                                     options => options.Repeat.Times(3));
         }
         
+        /// <summary>
+        /// NOTE: slow unit tests like this should be avoided.
+        /// </summary>
         [Test]
         public void Authorise_MultipleThreads_LogsExpectedNumberOfTimes()
         {
             //arrange
             var request = new AuthorisationRequest();
-            var expectedMessage = string.Format(LogAverageExecutionTimeDecorator<IAuthorisationService>.LogMessageFormat, 1, MaxRequestsPerEntry);
+            var expectedMessage = string.Format(LogAverageExecutionTimeDecorator<IAuthorisationService>.LogMessageFormat, 1, 100);
             _stopwatch.Stub(s => s.ElapsedTime).Return(new TimeSpan(0, 0, 0, 0, 1));
             _decorator = new LogAverageExecutionTimeDecorator<IAuthorisationService>(_decoratee,
                                                                                      _stopwatch,
-                                                                                     _logger, MaxRequestsPerEntry);
+                                                                                     _logger);
 
             var t1 = new Thread(() =>
             {
-                for (int x = 0; x <= MaxRequestsPerEntry * 3; x++)
+                for (int x = 0; x <= MaxRequestsPerEntry; x++)
                 {
                     _decorator.Authorise(request);
                 }
@@ -151,7 +154,7 @@ namespace Tesco.Code.Tests.Unit
 
             var t2 = new Thread(() =>
             {
-                for (int x = 0; x <= MaxRequestsPerEntry * 3; x++)
+                for (int x = 0; x <= MaxRequestsPerEntry; x++)
                 {
                     _decorator.Authorise(request);
                 }
@@ -159,7 +162,7 @@ namespace Tesco.Code.Tests.Unit
             
             var t3 = new Thread(() =>
             {
-                for (int x = 0; x <= MaxRequestsPerEntry * 3; x++)
+                for (int x = 0; x <= MaxRequestsPerEntry; x++)
                 {
                     _decorator.Authorise(request);
                 }
@@ -175,7 +178,7 @@ namespace Tesco.Code.Tests.Unit
 
             //assert
             _logger.AssertWasCalled(l => l.Log(expectedMessage),
-                                    options => options.Repeat.Times(9));
+                                    options => options.Repeat.Times(60));
         }
         
         [Test]
