@@ -17,6 +17,7 @@ namespace Tesco.Code.Tests.Unit
         [SetUp]
         public void SetUp()
         {
+            AverageExecutionTimeDecorator<IAuthorisationService>.ResetCounter();
             _decoratee = MockRepository.GenerateMock<IAuthorisationService>();
             _stopwatch = MockRepository.GenerateMock<ITescoStopwatch>();
             _logger = MockRepository.GenerateMock<ILogger>();

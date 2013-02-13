@@ -54,5 +54,13 @@ namespace Tesco.Code
                 _requestCounter = 0;
             }
         }
+
+        public static void ResetCounter()
+        {
+            lock (_requestCounterLock)
+            {
+                _requestCounter = 0;
+            }
+        }
     }
 }

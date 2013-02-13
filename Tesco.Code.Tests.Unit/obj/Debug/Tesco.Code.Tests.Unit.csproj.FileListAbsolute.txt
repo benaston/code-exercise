@@ -1,0 +1,11 @@
+C:\foo\code-exercise\Tesco.Code.Tests.Unit\bin\Debug\Tesco.Code.Tests.Unit.dll
+C:\foo\code-exercise\Tesco.Code.Tests.Unit\bin\Debug\Tesco.Code.Tests.Unit.pdb
+C:\foo\code-exercise\Tesco.Code.Tests.Unit\bin\Debug\nunit.framework.dll
+C:\foo\code-exercise\Tesco.Code.Tests.Unit\bin\Debug\Rhino.Mocks.dll
+C:\foo\code-exercise\Tesco.Code.Tests.Unit\bin\Debug\Tesco.Code.dll
+C:\foo\code-exercise\Tesco.Code.Tests.Unit\bin\Debug\Tesco.Code.pdb
+C:\foo\code-exercise\Tesco.Code.Tests.Unit\bin\Debug\nunit.framework.xml
+C:\foo\code-exercise\Tesco.Code.Tests.Unit\bin\Debug\Rhino.Mocks.xml
+C:\foo\code-exercise\Tesco.Code.Tests.Unit\obj\Debug\ResolveAssemblyReference.cache
+C:\foo\code-exercise\Tesco.Code.Tests.Unit\obj\Debug\Tesco.Code.Tests.Unit.dll
+C:\foo\code-exercise\Tesco.Code.Tests.Unit\obj\Debug\Tesco.Code.Tests.Unit.pdb
