@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="AuthorisationService.cs" />
     <Compile Include="AuthorisationRequest.cs" />
+    <Compile Include="LogExecutionCountDecorator.cs" />
     <Compile Include="IClock.cs" />
     <Compile Include="LogAverageExecutionTimeDecorator.cs" />
     <Compile Include="DisposableStopwatch.cs" />

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 
 namespace Tesco.Code.Example
 {
@@ -6,16 +7,19 @@ namespace Tesco.Code.Example
     {
         static void Main(string[] args)
         {
+            var consoleLogger = new ConsoleLogger();
+            var authorisationServiceWithDelay = new AuthorisationServiceWithDelay();
+            var executionCountDecorator =
+                new LogExecutionCountDecorator<IAuthorisationService>
+                    (authorisationServiceWithDelay, consoleLogger, new TescoClock(), 10);
             var service = 
                 new LogAverageExecutionTimeDecorator<IAuthorisationService>
-                    (new AuthorisationServiceWithDelay(),
-                     new TescoStopwatch(), 
-                     new ConsoleLogger(), 
-                     new TescoClock());
+                    (executionCountDecorator, new TescoStopwatch(), consoleLogger, new TescoClock());
 
-            for (int x = 0; x < 500; x++) //500 is a random number large enough to watch the "logging" in progress
+            for (int x = 0; x < 100; x++) //100 is a random number large enough to watch the "logging" in progress
             {
                 service.Authorise(new AuthorisationRequest());
+                Thread.Sleep(100);
             }
 
             Console.WriteLine("Example complete. Press any key to continue...");

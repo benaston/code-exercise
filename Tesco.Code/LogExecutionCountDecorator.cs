@@ -5,21 +5,20 @@ using System.Linq;
 
 namespace Tesco.Code
 {
-    public class LogAverageExecutionTimeDecorator<TDecoratee> 
+    public class LogExecutionCountDecorator<TDecoratee> 
         : IAuthorisationService where TDecoratee : IAuthorisationService
     {
         public const int MaximumSampleSize = 2000; //a random number
-        public const string LogMessageFormat = "{0} AuthorisationService::Authorise {1}ms (average execution time over {2} executions)\n";
+        public const string LogMessageFormat = "{0} AuthorisationService::Authorise {1} executions/second\n";
 
-        protected static readonly IList<double> SampleBuffer = new List<double>();
+        protected static readonly IList<DateTime> SampleBuffer = new List<DateTime>();
 
         private readonly IAuthorisationService _decoratee;
-        private readonly ITescoStopwatch _stopwatch;
         private readonly int _sampleSize;
         private readonly ILogger _logger;
         private readonly IClock _clock;
 
-        public LogAverageExecutionTimeDecorator(TDecoratee decoratee, ITescoStopwatch stopwatch, 
+        public LogExecutionCountDecorator(TDecoratee decoratee,
             ILogger logger, IClock clock, int sampleSize = 100)
         {
             if (sampleSize < 1 || sampleSize > MaximumSampleSize)
@@ -28,7 +27,6 @@ namespace Tesco.Code
             }
 
             _decoratee = decoratee;
-            _stopwatch = stopwatch;
             _logger = logger;
             _clock = clock;
             _sampleSize = sampleSize;
@@ -36,21 +34,18 @@ namespace Tesco.Code
 
         public void Authorise(AuthorisationRequest request)
         {
-            using (new DisposableStopwatch(_stopwatch, RecordMetric))
-            {
-                _decoratee.Authorise(request);
-            }
+            RecordMetric();
+            _decoratee.Authorise(request);
         }
 
         private void RecordMetric()
         {
-            double averageTiming;
+            TimeSpan sampleTimeSpan;
             int bufferSize;
 
             lock (SampleBuffer)
             {
-                var elapsedMilliseconds = _stopwatch.ElapsedTime.TotalMilliseconds;
-                SampleBuffer.Add(elapsedMilliseconds);
+                SampleBuffer.Add(_clock.ApplicationNow);
                 bufferSize = SampleBuffer.Count;
 
                 if (bufferSize < _sampleSize)
@@ -58,11 +53,11 @@ namespace Tesco.Code
                     return;
                 }
 
-                averageTiming = SampleBuffer.Average();
+                sampleTimeSpan = SampleBuffer.Last() - SampleBuffer[0];
                 SampleBuffer.Clear();
             }
 
-            _logger.Log(string.Format(LogMessageFormat, _clock.ApplicationNow.ToString("o"), averageTiming, bufferSize));
+            _logger.Log(string.Format(LogMessageFormat, _clock.ApplicationNow.ToString("o"), bufferSize/sampleTimeSpan.TotalSeconds));
         }
     }
 }

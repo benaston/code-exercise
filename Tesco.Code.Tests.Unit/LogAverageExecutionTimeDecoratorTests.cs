@@ -16,7 +16,7 @@ namespace Tesco.Code.Tests.Unit
     [TestFixture]
     public class LogAverageExecutionTimeDecoratorTests
     {
-        private const int MaxRequestsPerEntry = LogAverageExecutionTimeDecorator<IAuthorisationService>.MaximumSampleSize;
+        private const int MaxSampleSize = LogAverageExecutionTimeDecorator<IAuthorisationService>.MaximumSampleSize;
         private LogAverageExecutionTimeDecorator<IAuthorisationService> _decorator;
         private IAuthorisationService _decoratee;
         private ITescoStopwatch _stopwatch;
@@ -79,8 +79,8 @@ namespace Tesco.Code.Tests.Unit
                     _stopwatch, _logger, _clock, sampleSize)); 
         }
 
-        [TestCase(MaxRequestsPerEntry + 1)]
-        [TestCase(MaxRequestsPerEntry + 2)]
+        [TestCase(MaxSampleSize + 1)]
+        [TestCase(MaxSampleSize + 2)]
         [TestCase(int.MaxValue)]
         public void Authorise_SampleSizeLargerThanMaximum_ExceptionThrown(int sampleSize)
         {
@@ -122,13 +122,13 @@ namespace Tesco.Code.Tests.Unit
         {
             //arrange
             var request = new AuthorisationRequest();
-            var expectedMessage = string.Format(_logMessageFormat, _applicationNow.ToString("o"), 1, MaxRequestsPerEntry);
+            var expectedMessage = string.Format(_logMessageFormat, _applicationNow.ToString("o"), 1, MaxSampleSize);
             _stopwatch.Stub(s => s.ElapsedTime).Return(new TimeSpan(0, 0, 0, 0, 1));
             _decorator = new LogAverageExecutionTimeDecorator<IAuthorisationService>(_decoratee, 
-                _stopwatch, _logger, _clock, MaxRequestsPerEntry);
+                _stopwatch, _logger, _clock, MaxSampleSize);
 
             //act
-            for (int x = 0; x <= MaxRequestsPerEntry*3; x++)
+            for (int x = 0; x <= MaxSampleSize*3; x++)
             {
                 _decorator.Authorise(request);
             }
@@ -154,7 +154,7 @@ namespace Tesco.Code.Tests.Unit
 
             var t1 = new Thread(() =>
             {
-                for (int x = 0; x <= MaxRequestsPerEntry; x++)
+                for (int x = 0; x <= MaxSampleSize; x++)
                 {
                     _decorator.Authorise(request);
                 }
@@ -163,7 +163,7 @@ namespace Tesco.Code.Tests.Unit
 
             var t2 = new Thread(() =>
             {
-                for (int x = 0; x <= MaxRequestsPerEntry; x++)
+                for (int x = 0; x <= MaxSampleSize; x++)
                 {
                     _decorator.Authorise(request);
                 }
@@ -171,7 +171,7 @@ namespace Tesco.Code.Tests.Unit
             
             var t3 = new Thread(() =>
             {
-                for (int x = 0; x <= MaxRequestsPerEntry; x++)
+                for (int x = 0; x <= MaxSampleSize; x++)
                 {
                     _decorator.Authorise(request);
                 }

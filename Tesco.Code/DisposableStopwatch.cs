@@ -4,7 +4,6 @@ namespace Tesco.Code
 {
     /// <summary>
     /// Permits the "using" syntax for the timing instrumentation.
-    /// Unneccessarily complicated, perhaps.
     /// </summary>
     public class DisposableStopwatch : IDisposable
     {

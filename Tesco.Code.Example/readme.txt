@@ -1,20 +1,9 @@
-﻿
-Decorates implementations of the IAuthorisationService
-with logging of average execution time and number of executions.
-Use of generics is a little nasty, but it reduces type name length somewhat.
+﻿For this exercise I decided to see how far I could get with the decorator pattern in the time I had available.
 
-One problem with this implementation is that I am attempting to control access to 
-shared static variables manually, which is error-prone. Another problem is 
-that when the application shuts down then upto MaximumSampleSize timings may 
-never have a corresponding average logged.
+I test-drove the implementation of the execution time decorator. I'll hold my hands up and admit that, due to time constraints I then implemented the ExecutionTimeDecorator directly.
 
-Depending on the nature of the application within which the code sits, a different 
-"buffer" location for the timing information might be preferred: for example 
-an external tuple store.
+One problem with this implementation is that I am attempting to control access to shared state manually, which is error-prone. Another problem is 
+that when the application shuts down, the in memory buffers will not be flushed.
 
 Finally, Windows exposes performance counters to the .NET framework which might 
 be of use here.
-
-//outside of the lock to minimise the length of the critical section
-            //logging performance is of course very important (if it blocks)!
-            //a non-blocking queue might be used here
