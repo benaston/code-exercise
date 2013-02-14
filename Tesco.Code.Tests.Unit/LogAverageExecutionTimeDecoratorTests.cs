@@ -16,20 +16,25 @@ namespace Tesco.Code.Tests.Unit
     [TestFixture]
     public class LogAverageExecutionTimeDecoratorTests
     {
-        private const int MaxRequestsPerEntry = LogAverageExecutionTimeDecorator<IAuthorisationService>.MaximumRequestsPerLogEntry;
+        private const int MaxRequestsPerEntry = LogAverageExecutionTimeDecorator<IAuthorisationService>.MaximumSampleSize;
         private LogAverageExecutionTimeDecorator<IAuthorisationService> _decorator;
         private IAuthorisationService _decoratee;
         private ITescoStopwatch _stopwatch;
         private ILogger _logger;
+        private IClock _clock;
+        private readonly DateTime _applicationNow = new DateTime(2000,1,1);
+        private const string _logMessageFormat = LogAverageExecutionTimeDecorator<IAuthorisationService>.LogMessageFormat;
 
         [SetUp]
         public void SetUp()
         {
-            LogAverageExecutionTimeDecorator<IAuthorisationService>.ResetRequestCounter();
+            LogAverageExecutionTimeDecoratorForTest<IAuthorisationService>.ResetRequestCounter();
             _decoratee = MockRepository.GenerateMock<IAuthorisationService>();
             _stopwatch = MockRepository.GenerateMock<ITescoStopwatch>();
             _logger = MockRepository.GenerateMock<ILogger>();
-            _decorator = new LogAverageExecutionTimeDecorator<IAuthorisationService>(_decoratee, _stopwatch, _logger, 1);
+            _clock = MockRepository.GenerateMock<IClock>();
+            _clock.Stub(c => c.ApplicationNow).Return(_applicationNow);
+            _decorator = new LogAverageExecutionTimeDecorator<IAuthorisationService>(_decoratee, _stopwatch, _logger, _clock, 1);
         }
 
         [TestCase(0, 1, 0)]
@@ -40,14 +45,16 @@ namespace Tesco.Code.Tests.Unit
         [TestCase(5, 3, 1)]
         [TestCase(6, 3, 2)]
         [TestCase(12, 3, 4)]
-        public void Authorise_RequestsPerLogEntrySet_CallsLoggerCorrectNumberOfTimes(int numberOfRequests,
-                                                                                     int requestsPerLogEntry,
-                                                                                     int expectedNumberOfCallsToLogger)
+        public void Authorise_SampleSizeSupplied_CallsLoggerCorrectNumberOfTimes(int numberOfRequests,
+                                                                                int sampleSize,
+                                                                                int expectedNumberOfCallsToLogger)
         {
             //arrange
             _decorator = new LogAverageExecutionTimeDecorator<IAuthorisationService>(_decoratee, 
-                                                                                  _stopwatch, 
-                                                                                  _logger, requestsPerLogEntry);
+                                                                                     _stopwatch, 
+                                                                                     _logger, 
+                                                                                     _clock, 
+                                                                                     sampleSize);
             var request = new AuthorisationRequest();
 
             //act
@@ -64,21 +71,23 @@ namespace Tesco.Code.Tests.Unit
         [TestCase(0)]
         [TestCase(-1)]
         [TestCase(-2)]
-        public void Authorise_RequestsPerLogEntryLessThanOne_ExceptionThrown(int requestsPerLogEntry)
+        public void Authorise_SampleSizeLessThanOne_ExceptionThrown(int sampleSize)
         {
             //arrange & act & assert
-            Assert.Throws<ArgumentOutOfRangeException>(() => new LogAverageExecutionTimeDecorator<IAuthorisationService>(_decoratee,
-                                                                                  _stopwatch, _logger, requestsPerLogEntry)); 
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => new LogAverageExecutionTimeDecorator<IAuthorisationService>(_decoratee, 
+                    _stopwatch, _logger, _clock, sampleSize)); 
         }
 
         [TestCase(MaxRequestsPerEntry + 1)]
         [TestCase(MaxRequestsPerEntry + 2)]
         [TestCase(int.MaxValue)]
-        public void Authorise_RequestsPerLogEntryGreaterThan2000_ExceptionThrown(int requestsPerLogEntry)
+        public void Authorise_SampleSizeLargerThanMaximum_ExceptionThrown(int sampleSize)
         {
             //arrange & act & assert
-            Assert.Throws<ArgumentOutOfRangeException>(() => new LogAverageExecutionTimeDecorator<IAuthorisationService>(_decoratee,
-                                                                                  _stopwatch, _logger, requestsPerLogEntry)); 
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => new LogAverageExecutionTimeDecorator<IAuthorisationService>(_decoratee, 
+                _stopwatch, _logger, _clock, sampleSize)); 
         }
 
         [TestCase(1,2,3, 2000)]
@@ -86,14 +95,15 @@ namespace Tesco.Code.Tests.Unit
         [TestCase(1,1,1, 1000)]
         [TestCase(100,100,100, 100000)]
         [TestCase(100,200,600, 300000)]
-        public void Authorise_Always_LogsAverageExecutionTime(int timing1, int timing2, int timing3, int expectedAverage)
+        public void Authorise_GivenARunOf3Timings_LogsAverageExecutionTime(int timing1, 
+            int timing2, int timing3, int expectedAverage)
         {
             //arrange
             var request = new AuthorisationRequest();
-            var expectedMessage = string.Format(LogAverageExecutionTimeDecorator<IAuthorisationService>.LogMessageFormat, expectedAverage, "3");
+            var expectedMessage = string.Format(_logMessageFormat, _applicationNow.ToString("o"), expectedAverage, "3");
             _decorator = new LogAverageExecutionTimeDecorator<IAuthorisationService>(_decoratee,
                                                                                      _stopwatch,
-                                                                                     _logger, 3);
+                                                                                     _logger, _clock, 3);
 
             //act
             _stopwatch.Stub(s => s.ElapsedTime).Return(new TimeSpan(0, 0, 0, timing1)).Repeat.Once();
@@ -108,15 +118,14 @@ namespace Tesco.Code.Tests.Unit
         }
 
         [Test]
-        public void Authorise_InvokedOverMaximumRequestsPerLogEntry_ResetsCounterAndContinues()
+        public void Authorise_InvokedOverSampleSize_ContinuesLogging()
         {
             //arrange
             var request = new AuthorisationRequest();
-            var expectedMessage = string.Format(LogAverageExecutionTimeDecorator<IAuthorisationService>.LogMessageFormat, 1, MaxRequestsPerEntry);
+            var expectedMessage = string.Format(_logMessageFormat, _applicationNow.ToString("o"), 1, MaxRequestsPerEntry);
             _stopwatch.Stub(s => s.ElapsedTime).Return(new TimeSpan(0, 0, 0, 0, 1));
-            _decorator = new LogAverageExecutionTimeDecorator<IAuthorisationService>(_decoratee,
-                                                                                     _stopwatch,
-                                                                                     _logger, MaxRequestsPerEntry);
+            _decorator = new LogAverageExecutionTimeDecorator<IAuthorisationService>(_decoratee, 
+                _stopwatch, _logger, _clock, MaxRequestsPerEntry);
 
             //act
             for (int x = 0; x <= MaxRequestsPerEntry*3; x++)
@@ -137,11 +146,11 @@ namespace Tesco.Code.Tests.Unit
         {
             //arrange
             var request = new AuthorisationRequest();
-            var expectedMessage = string.Format(LogAverageExecutionTimeDecorator<IAuthorisationService>.LogMessageFormat, 1, 100);
+            var expectedMessage = string.Format(_logMessageFormat, _applicationNow.ToString("o"), 1, 100);
             _stopwatch.Stub(s => s.ElapsedTime).Return(new TimeSpan(0, 0, 0, 0, 1));
             _decorator = new LogAverageExecutionTimeDecorator<IAuthorisationService>(_decoratee,
                                                                                      _stopwatch,
-                                                                                     _logger);
+                                                                                     _logger, _clock);
 
             var t1 = new Thread(() =>
             {

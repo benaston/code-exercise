@@ -10,7 +10,8 @@ namespace Tesco.Code.Example
                 new LogAverageExecutionTimeDecorator<IAuthorisationService>
                     (new AuthorisationServiceWithDelay(),
                      new TescoStopwatch(), 
-                     new ConsoleLogger());
+                     new ConsoleLogger(), 
+                     new TescoClock());
 
             for (int x = 0; x < 500; x++) //500 is a random number large enough to watch the "logging" in progress
             {

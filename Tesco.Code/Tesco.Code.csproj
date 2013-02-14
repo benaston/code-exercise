@@ -43,12 +43,14 @@
   <ItemGroup>
     <Compile Include="AuthorisationService.cs" />
     <Compile Include="AuthorisationRequest.cs" />
+    <Compile Include="IClock.cs" />
     <Compile Include="LogAverageExecutionTimeDecorator.cs" />
     <Compile Include="DisposableStopwatch.cs" />
     <Compile Include="IAuthorisationService.cs" />
     <Compile Include="ILogger.cs" />
     <Compile Include="ITescoStopwatch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TescoClock.cs" />
     <Compile Include="TescoStopwatch.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
