@@ -9,7 +9,7 @@ namespace Tesco.Code
         : IAuthorisationService where TDecoratee : IAuthorisationService
     {
         public const int MaximumSampleSize = 2000; //a random number
-        public const string LogMessageFormat = "{0} AuthorisationService::Authorise {1}ms averaged over {2} executions\n";
+        public const string LogMessageFormat = "{0} AuthorisationService::Authorise avg. execution time: {1}ms (over {2} executions)\n";
 
         protected static readonly IList<double> SampleBuffer = new List<double>();
 
